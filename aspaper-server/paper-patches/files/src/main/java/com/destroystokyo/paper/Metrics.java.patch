@@ -4,7 +4,7 @@
              boolean logFailedRequests = config.getBoolean("logFailedRequests", false);
              // Only start Metrics, if it's enabled in the config
              if (config.getBoolean("enabled", true)) {
--                Metrics metrics = new Metrics("Paper", serverUUID, logFailedRequests, Bukkit.getLogger());
+-                Metrics metrics = new Metrics("Pufferfish", serverUUID, logFailedRequests, Bukkit.getLogger()); // Pufferfish
 +                Metrics metrics = new Metrics("Advanced Slime Paper", serverUUID, logFailedRequests, Bukkit.getLogger()); //ASP
  
                  metrics.addCustomChart(new Metrics.SimplePie("minecraft_version", () -> {

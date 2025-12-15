@@ -7,26 +7,32 @@ plugins {
 }
 
 paperweight {
-    upstreams.paper {
-        ref = providers.gradleProperty("paperRef")
+    upstreams.create("pufferfish") {
+        repo.set(github("pufferfish-gg", "pufferfish"))
+        ref = providers.gradleProperty("pufferfishRef")
 
         // Setup file patches for build scripts
         patchFile {
-            path = "paper-api/build.gradle.kts"
+            path = "pufferfish-api/build.gradle.kts"
             outputFile = file("aspaper-api/build.gradle.kts")
             patchFile = file("aspaper-api/build.gradle.kts.patch")
         }
         patchFile {
-            path = "paper-server/build.gradle.kts"
+            path = "pufferfish-server/build.gradle.kts"
             outputFile = file("aspaper-server/build.gradle.kts")
             patchFile = file("aspaper-server/build.gradle.kts.patch")
         }
 
-        patchDir("paperApi") {
+        patchRepo("paperApi") {
             upstreamPath = "paper-api"
-            excludes = setOf("build.gradle.kts")
             patchesDir = file("aspaper-api/paper-patches")
             outputDir = file("paper-api")
+        }
+        patchDir("pufferfishApi") {
+            upstreamPath = "pufferfish-api"
+            excludes = listOf("build.gradle.kts", "build.gradle.kts.patch", "paper-patches")
+            patchesDir = file("aspaper-api/pufferfish-patches")
+            outputDir = file("pufferfish-api")
         }
     }
 }
@@ -44,6 +50,7 @@ subprojects {
     repositories {
         mavenCentral()
         maven(PAPER_MAVEN_PUBLIC_URL)
+        maven("https://jitpack.io")
     }
 
     tasks.withType<AbstractArchiveTask>().configureEach {

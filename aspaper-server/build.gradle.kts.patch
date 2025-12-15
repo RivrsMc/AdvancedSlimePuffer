@@ -1,80 +1,72 @@
---- a/paper-server/build.gradle.kts
-+++ b/paper-server/build.gradle.kts
-@@ -26,6 +_,17 @@
-     minecraftVersion = providers.gradleProperty("mcVersion")
-     gitFilePatches = false
+--- a/pufferfish-server/build.gradle.kts
++++ b/pufferfish-server/build.gradle.kts
+@@ -35,7 +_,22 @@
+         }
+      }
  
+-    activeFork = pufferfish
 +    val aspaper = forks.register("aspaper") {
-+        upstream.patchDir("paperServer") {
-+            upstreamPath = "paper-server"
-+            excludes = setOf("src/minecraft", "patches", "build.gradle.kts")
++        forks = pufferfish
++        upstream.patchRepo("paperServer") {
++            upstreamRepo = pufferfish.patchedRepo("paperServer")
 +            patchesDir = rootDirectory.dir("aspaper-server/paper-patches")
 +            outputDir = rootDirectory.dir("paper-server")
++        }
++        upstream.patchDir("pufferfishServer") {
++            upstreamPath = "pufferfish-server"
++            excludes = setOf("src/minecraft", "paper-patches", "minecraft-patches", "build.gradle.kts", "build.gradle.kts.patch")
++            patchesDir = rootDirectory.dir("aspaper-server/pufferfish-patches")
++            outputDir = rootDirectory.dir("pufferfish-server")
 +        }
 +    }
 +
 +    activeFork = aspaper
-+
+ 
      spigot {
          enabled = true
-         buildDataRef = "436eac9815c211be1a2a6ca0702615f995e81c44"
-@@ -107,7 +_,19 @@
+@@ -122,10 +_,14 @@
+     main {
+         java { srcDir("../paper-server/src/main/java") }
+         resources { srcDir("../paper-server/src/main/resources") }
++        java { srcDir("../pufferfish-server/src/main/java") }
++        resources { srcDir("../pufferfish-server/src/main/resources") }
+     }
+     test {
+         java { srcDir("../paper-server/src/test/java") }
+         resources { srcDir("../paper-server/src/test/resources") }
++        java { srcDir("../pufferfish-server/src/test/java") }
++        resources { srcDir("../pufferfish-server/src/test/resources") }
      }
  }
  
--val log4jPlugins = sourceSets.create("log4jPlugins")
-+sourceSets {
-+    main {
-+        java { srcDir("../paper-server/src/main/java") }
-+        resources { srcDir("../paper-server/src/main/resources") }
-+    }
-+    test {
-+        java { srcDir("../paper-server/src/test/java") }
-+        resources { srcDir("../paper-server/src/test/resources") }
-+    }
-+}
-+val log4jPlugins = sourceSets.create("log4jPlugins") {
-+    java { srcDir("../paper-server/src/log4jPlugins/java") }
-+}
- configurations.named(log4jPlugins.compileClasspathConfigurationName) {
-     extendsFrom(configurations.compileClasspath.get())
- }
-@@ -129,7 +_,8 @@
+@@ -154,7 +_,9 @@
  }
  
  dependencies {
--    implementation(project(":paper-api"))
-+    implementation(project(":aspaper-api")) //ASP
+-    implementation(project(":pufferfish-api")) // Pufferfish
++    implementation(project(":aspaper-api")) // ASP
 +    implementation(project(":core")) //ASP
++    implementation("commons-io:commons-io:2.11.0")
      implementation("ca.spottedleaf:concurrentutil:0.0.3")
      implementation("org.jline:jline-terminal-ffm:3.27.1") // use ffm on java 22+
      implementation("org.jline:jline-terminal-jni:3.27.1") // fall back to jni on java 21
-@@ -200,14 +_,14 @@
+@@ -240,14 +_,14 @@
          val gitBranch = git.exec(providers, "rev-parse", "--abbrev-ref", "HEAD").get().trim()
          attributes(
              "Main-Class" to "org.bukkit.craftbukkit.Main",
--            "Implementation-Title" to "Paper",
-+            "Implementation-Title" to "AdvancedSlimePaper", //ASP
+-            "Implementation-Title" to "Pufferfish",
++            "Implementation-Title" to "AdvancedSlimePuffer", //ASP
              "Implementation-Version" to implementationVersion,
              "Implementation-Vendor" to date,
--            "Specification-Title" to "Paper",
-+            "Specification-Title" to "AdvancedSlimePaper", //ASP
+-            "Specification-Title" to "Pufferfish",
++            "Specification-Title" to "AdvancedSlimePuffer", //ASP
              "Specification-Version" to project.version,
--            "Specification-Vendor" to "Paper Team",
--            "Brand-Id" to "papermc:paper",
--            "Brand-Name" to "Paper",
+-            "Specification-Vendor" to "Pufferfish Studios LLC",
+-            "Brand-Id" to "pufferfish:pufferfish",
+-            "Brand-Name" to "Pufferfish",
 +            "Specification-Vendor" to "InfernalSuite Team", //ASP
 +            "Brand-Id" to "infernalsuite:advancedslimepaper", //ASP
-+            "Brand-Name" to "AdvancedSlimePaper", //ASP
++            "Brand-Name" to "AdvancedSlimePuffer", //ASP
              "Build-Number" to (build ?: ""),
              "Build-Time" to buildTime.toString(),
              "Git-Branch" to gitBranch,
-@@ -266,7 +_,7 @@
-     jvmArgumentProviders.add(provider)
- }
- 
--val generatedDir: java.nio.file.Path = layout.projectDirectory.dir("src/generated/java").asFile.toPath()
-+val generatedDir: java.nio.file.Path = rootProject.layout.projectDirectory.dir("paper-server/src/generated/java").asFile.toPath()
- idea {
-     module {
-         generatedSourceDirs.add(generatedDir.toFile())
